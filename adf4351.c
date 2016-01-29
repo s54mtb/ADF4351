@@ -11,5 +11,3 @@
 #include "stm32f0xx.h"                  // Device header
 #include "adf4351.h"
 
-
-

@@ -134,6 +134,215 @@ typedef union
 } PllRegister5_t;
 
 
+/** \brief  Phase adjust type
+ *  	The phase adjust bit (Bit DB28) enables adjustment 
+ *  	of the output phase of a given output frequency.
+ */
+typedef enum
+{
+	ADF4351_PHASE_ADJ_OFF,
+	ADF4351_PHASE_ADJ_ON
+} ADF4351_PHASE_ADJ_t;
+
+
+/** \brief Prescaler Value  type
+ *  	The dual-modulus prescaler (P/P + 1), along with the INT, FRAC, and 
+ *		MOD values, determines the overall division ratio from the VCO 
+ *		output to the PFD input.
+ */
+typedef enum
+{
+	ADF4351_PRESCALER_4_5,		/*!< Prescaler = 4/5: NMIN = 23 */
+	ADF4351_PRESCALER_8_9			/*!< Prescaler = 8/9: NMIN = 75 */
+} ADF4351_PRESCALER_t;
+
+
+/** \brief Low Noise and Low Spur Modes  type
+ *  	The noise mode allows the user to optimize a design either 
+ *    for improved spurious performance or for improved phase noise performance.
+ */
+typedef enum
+{
+	ADF4351_LOW_NOISE_MODE,
+	ADF4351_LOW_SPUR_MODE = 3
+} ADF4351_SPURNOISE_t;
+
+
+/** \brief MUXOUT  type
+ *  	The on-chip multiplexer
+ */
+typedef enum 
+{
+	ADF4351_MUX_THREESTATE,
+	ADF4351_MUX_DVDD,
+	ADF4351_MUX_DGND,
+	ADF4351_MUX_RCOUNTER,
+	ADF4351_MUX_NDIVIDER,
+	ADF4351_MUX_ANALOGLOCK,
+	ADF4351_MUX_DIGITALLOCK
+} ADF4351_MUX_t;
+
+
+
+/** \brief Disable/Enable  type
+ *  	various bits are Disable(0)/Enable(1) type  
+ */
+typedef enum 
+{
+	ADF4351_DISABLE,
+	ADF4351_ENABLE
+} ADF4351_ED_t;
+	
+
+
+/** \brief Charge Pump Current Setting  type
+ *  	This value should be set to the charge pump current 
+ *    that the loop filter is designed with
+ */
+typedef enum 
+{
+	ADF4351_CPCURRENT_0_31,
+	ADF4351_CPCURRENT_0_63,
+	ADF4351_CPCURRENT_0_94,
+	ADF4351_CPCURRENT_1_25,
+	ADF4351_CPCURRENT_1_56,
+	ADF4351_CPCURRENT_1_88,
+	ADF4351_CPCURRENT_2_19,
+	ADF4351_CPCURRENT_2_50,
+	ADF4351_CPCURRENT_2_81,
+	ADF4351_CPCURRENT_3_13,
+	ADF4351_CPCURRENT_3_44,
+	ADF4351_CPCURRENT_3_75,
+	ADF4351_CPCURRENT_4_06,
+	ADF4351_CPCURRENT_4_38,
+	ADF4351_CPCURRENT_4_69,
+	ADF4351_CPCURRENT_5_00
+} 	ADF4351_CPCURRENT_t;
+
+
+
+/** \brief Lock Detect Function  type
+ *  	The LDF controls the number of PFD cycles monitored by the lock detect 
+ *    circuit to ascertain whether lock has been achieved.
+ */
+typedef enum 
+{
+	ADF4351_LDF_FRAC,
+	ADF4351_LDF_INT
+} ADF4351_LDF_t;
+
+
+
+/** \brief  Lock Detect Precision type
+ *  	The lock detect precision  sets the comparison window in the lock detect circuit.
+ */
+typedef enum 
+{
+	ADF4351_LDP_10NS,
+	ADF4351_LDP_6NS
+} ADF4351_LDP_t;
+
+
+/** \brief Phase Detector Polarity  type
+ *  	Phase Detector Polarity
+ */
+typedef enum 
+{
+	ADF4351_POLARITY_NEGATIVE, /*!< For active filter with an inverting charac-teristic */
+	ADF4351_POLARITY_POSITIVE  /*!< For passive loop filter or a noninverting active loop filter */
+} ADF4351_POLARITY_t;
+
+
+/** \brief  Band Select Clock Mode type
+ *  	
+ */
+typedef enum 
+{
+	ADF4351_BANDCLOCK_LOW,
+	ADF4351_BANDCLOCK_HIGH
+} ADF4351_BANDCLOCK_t;
+	
+
+/** \brief  Antibacklash Pulse Width type
+ *  	
+ */
+typedef enum 
+{
+	ADF4351_ABP_6NS,
+	ADF4351_ABP_3NS
+} ADF4351_ABP_t;
+	
+
+/** \brief Clock Divider Mode  type
+ *  	
+ */
+typedef enum 
+{
+  ADF4351_CLKDIVMODE_OFF,
+  ADF4351_CLKDIVMODE_FAST_LOCK,
+  ADF4351_CLKDIVMODE_RESYNC
+} ADF4351_CLKDIVMODE_t;
+	
+
+/** \brief Feedback Select   type
+ *  	
+ */
+typedef enum 
+{
+  ADF4351_FEEDBACK_DIVIDED,     /*!< the signal is taken from the output of the output dividers */
+	ADF4351_FEEDBACK_FUNDAMENTAL  /*!<  he signal is taken directly from the VCO */
+} ADF4351_FEEDBACK_t;
+	
+
+
+/** \brief RF Divider Select type
+ *  	
+ */
+typedef enum 
+{
+	ADF4351_RFDIV_1,
+	ADF4351_RFDIV_2,
+	ADF4351_RFDIV_4,
+	ADF4351_RFDIV_8,
+	ADF4351_RFDIV_16,
+	ADF4351_RFDIV_32,
+	ADF4351_RFDIV_64
+} 	ADF4351_RFDIV_t;
+
+
+/** \brief VCO Power-Down  type
+ *  	
+ */
+typedef enum 
+{
+	ADF4351_VCO_POWERUP,
+	ADF4351_VCO_POWERDOWN
+} ADF4351_VCO_POWER_t;
+
+
+/** \brief Output Power  type
+ *  	
+ */
+typedef enum 
+{
+	ADF4351_POWER_MINUS4DB,
+	ADF4351_POWER_MINUS1DB,
+	ADF4351_POWER_PLUS2DB,
+	ADF4351_POWER_PLUS5DB
+} ADF4351_POWER_t;
+
+
+
+/** \brief Lock Detect Pin Operation  type
+ *  	
+ */
+typedef enum
+{
+	ADF4351_LD_PIN_LOW,
+	ADF4351_LD_PIN_DIGITAL_LOCK,
+	ADF4351_LD_PIN_LOW_,
+	ADF4351_LD_PIN_HIGH
+} ADF4351_LD_PIN_t;
 
 
 
