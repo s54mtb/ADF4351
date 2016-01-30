@@ -13,6 +13,9 @@
 
 #include "stm32f0xx.h"                  // Device header
 
+
+#define ADF5451_PFD_MAX					32.0e6
+
 /** \brief  Union type for the structure of Register0 in ADF4351
  */
 typedef union
@@ -25,7 +28,7 @@ typedef union
 		uint32_t _reserved_0		:1;  		/*!< bit: 31     	RESERVED */
 	} b;
 	uint32_t w;
-} PllRegister0_t;
+} ADF4351_Reg0_t;
 
 
 
@@ -43,7 +46,7 @@ typedef union
 		uint32_t _reserved_0		:3;  		/*!< bit: 29..31 	RESERVED */
 	} b;
 	uint32_t w;
-} PllRegister1_t;
+} ADF4351_Reg1_t;
 
 
 /** \brief  Union type for the structure of Register2 in ADF4351
@@ -69,7 +72,7 @@ typedef union
 		uint32_t _reserved_0		:1; 		/*!< bit: 31			RESERVED  */
 	} b;
 	uint32_t w;
-} PllRegister2_t;
+} ADF4351_Reg2_t;
 
 
 
@@ -91,7 +94,7 @@ typedef union
 		uint32_t _reserved_2		:8; 		/*!< bit:  24..31	RESERVED */
 	} b;
 	uint32_t w;
-} PllRegister3_t;
+} ADF4351_Reg3_t;
 
 
 /** \brief  Union type for the structure of Register4 in ADF4351
@@ -114,7 +117,7 @@ typedef union
 		uint32_t _reserved_0	:8;  		/*!< bit: 24..31 RESERVED */
 	} b;
 	uint32_t w;
-} PllRegister4_t;
+} ADF4351_Reg4_t;
 
 
 /** \brief  Union type for the structure of Register5 in ADF4351
@@ -131,7 +134,7 @@ typedef union
 		uint32_t _reserved_3  	:8;  		/*!< bit: 24..31 RESERVED */
 	} b;
 	uint32_t w;
-} PllRegister5_t;
+} ADF4351_Reg5_t;
 
 
 /** \brief  Phase adjust type
@@ -310,6 +313,27 @@ typedef enum
 } 	ADF4351_RFDIV_t;
 
 
+/** \brief Reference Divider
+ *  	
+ */
+typedef enum 
+{
+	ADF4351_REFDIV_1,
+	ADF4351_REFDIV_2
+} 	ADF4351_REFDIV_t;
+
+
+/** \brief Reference Doubler
+ *  	
+ */
+typedef enum 
+{
+	ADF4351_REFMUL_1,
+	ADF4351_REFMUL_2
+} 	ADF4351_REFMUL_t;
+
+
+
 /** \brief VCO Power-Down  type
  *  	
  */
@@ -344,6 +368,41 @@ typedef enum
 	ADF4351_LD_PIN_HIGH
 } ADF4351_LD_PIN_t;
 
+
+
+///** \brief  ADF4351 state structure
+// */
+//typedef struct
+//{
+
+//	double				RFout; 										/// Required frequency in Hz
+//	double 				REFin;										/// Reference frequency in Hz
+//	double 				OutputChannelSpacing;			/// Channel spacing in Hz
+//	uint16_t 			Rcounter;									/// R counter value
+//	
+//} ADF4351_state;
+
+
+/** \brief  ADF4351 Driver Error codes 
+ */
+typedef enum
+{
+	ADF4351_Err_None,												/// No error
+	ADF4351_Err_PFD,												/// PFD max error check
+	ADF4351_Err_BandSelFreqTooHigh,					/// Band select frequency too high
+	ADF4351_Err_InvalidRCounterValue,				/// Invalid R couinter value
+} 	ADF4351_ERR_t;	
+
+extern ADF4351_Reg0_t *ADF4351_Reg0;
+extern ADF4351_Reg1_t *ADF4351_Reg1;
+extern ADF4351_Reg2_t *ADF4351_Reg2;
+extern ADF4351_Reg3_t *ADF4351_Reg3;
+extern ADF4351_Reg4_t *ADF4351_Reg4;
+extern ADF4351_Reg5_t *ADF4351_Reg5;
+
+
+ADF4351_ERR_t UpdateFrequencyRegisters(double RFout, double REFin, double OutputChannelSpacing, int gcd, int AutoBandSelectClock, double *RFoutCalc );
+uint32_t ADF4351_GetRegisterBuf(int addr);
 
 
 #endif
