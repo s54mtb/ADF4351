@@ -16,19 +16,19 @@
  * \brief Buffer for ADF4351 registers 
  *
  */
-volatile uint32_t ADF4351_Reg[6];
+//volatile uint32_t ADF4351_Reg[6];
 
 
 /**
- * \brief Pointers to ADF4351 register buffer 
+ * \brief ADF4351 registers - local storage 
  *
  */
-ADF4351_Reg0_t *ADF4351_Reg0 = (ADF4351_Reg0_t *) &ADF4351_Reg[0];
-ADF4351_Reg1_t *ADF4351_Reg1 = (ADF4351_Reg1_t *) &ADF4351_Reg[1];
-ADF4351_Reg2_t *ADF4351_Reg2 = (ADF4351_Reg2_t *) &ADF4351_Reg[2];
-ADF4351_Reg3_t *ADF4351_Reg3 = (ADF4351_Reg3_t *) &ADF4351_Reg[3];
-ADF4351_Reg4_t *ADF4351_Reg4 = (ADF4351_Reg4_t *) &ADF4351_Reg[4];
-ADF4351_Reg5_t *ADF4351_Reg5 = (ADF4351_Reg5_t *) &ADF4351_Reg[5];
+ADF4351_Reg0_t ADF4351_Reg0;
+ADF4351_Reg1_t ADF4351_Reg1;
+ADF4351_Reg2_t ADF4351_Reg2;
+ADF4351_Reg3_t ADF4351_Reg3;
+ADF4351_Reg4_t ADF4351_Reg4;
+ADF4351_Reg5_t ADF4351_Reg5;
 
 
 /**  \brief Private Function Prototypes
@@ -83,18 +83,24 @@ ADF4351_ERR_t UpdateFrequencyRegisters(double RFout, double REFin, double Output
   double 			BandSelectClockDivider;
   double 			BandSelectClockFrequency;
 
+	/** Initial error and range check */
+	/* Error>>>> Disable GCD calculation when phase adjust active */
+	if (gcd & ADF4351_Reg1.b.PhaseAdjust) return ADF4351_Err_NoGCD_PhaseAdj;
+  if (RFout > ADF4351_RFOUT_MAX) return	ADF4351_Err_RFoutTooHigh;
+	if (RFout < ADF4351_RFOUTMIN) return ADF4351_Err_RFoutTooLow;
+	if (REFin > ADF4351_REFINMAX) return	ADF4351_Err_REFinTooHigh;
 	
 	// Calculate N, INT, FRAC, MOD
 
-	RefD2 = ADF4351_Reg2->b.RDiv2 + 1;					// 1 or 2
-	RefDoubler = ADF4351_Reg2->b.RMul2 + 1;     // 1 or 2
-	Rcounter = ADF4351_Reg2->b.RCountVal;
+	RefD2 = ADF4351_Reg2.b.RDiv2 + 1;					// 1 or 2
+	RefDoubler = ADF4351_Reg2.b.RMul2 + 1;     // 1 or 2
+	Rcounter = ADF4351_Reg2.b.RCountVal;
 	PFDFreq = (REFin * RefDoubler / RefD2) / Rcounter;
 
 	OutputDivider = (1U<<ADF4351_Select_Output_Divider(RFout));
 
 	
-	if (ADF4351_Reg4->b.Feedback == 1) // fundamental
+	if (ADF4351_Reg4.b.Feedback == 1) // fundamental
 			N = ((RFout * OutputDivider) / PFDFreq);
 	else										// divided
 			N = (RFout / PFDFreq);
@@ -114,18 +120,23 @@ ADF4351_ERR_t UpdateFrequencyRegisters(double RFout, double REFin, double Output
 	if (MOD == 1)
 			MOD = 2;
 
-	*RFoutCalc = (((double)((double)INT + ((double)FRAC / (double)MOD)) * (double)PFDFreq / OutputDivider) * ((ADF4351_Reg4->b.Feedback == 1) ? 1 : OutputDivider));
+	*RFoutCalc = (((double)((double)INT + ((double)FRAC / (double)MOD)) * (double)PFDFreq / OutputDivider) * ((ADF4351_Reg4.b.Feedback == 1) ? 1 : OutputDivider));
 	N = INT + (FRAC / MOD);
+	
+	// N is out of range!
+	if ((N < 23) | (N > 65635)) return ADF4351_Err_InvalidN;
+	if (MOD > 4095) return ADF4351_Err_InvalidMOD;
 
 	/* Check for PFD Max error, return error code if not OK */
-	if ((PFDFreq > ADF5451_PFD_MAX) && (ADF4351_Reg3->b.BandSelMode == 0)) return ADF4351_Err_PFD;
-	if ((PFDFreq > ADF5451_PFD_MAX) && (ADF4351_Reg3->b.BandSelMode == 1) && (FRAC != 0)) return ADF4351_Err_PFD;
-	if ((PFDFreq > 90) && (ADF4351_Reg3->b.BandSelMode == 1) && (FRAC != 0))  return ADF4351_Err_PFD;
-
+	if ((PFDFreq > ADF5451_PFD_MAX) && (ADF4351_Reg3.b.BandSelMode == 0)) return ADF4351_Err_PFD; 
+	if ((PFDFreq > ADF5451_PFD_MAX) && (ADF4351_Reg3.b.BandSelMode == 1) && (FRAC != 0)) return ADF4351_Err_PFD;
+	if ((PFDFreq > 90) && (ADF4351_Reg3.b.BandSelMode == 1) && (FRAC != 0))  return ADF4351_Err_PFD;
+	if ((ADF4351_Reg2.b.LowNoiseSpur == ADF4351_LOW_SPUR_MODE) && (MOD < 50)) return ADF4351_Err_InvalidMODLowSpur;
+		
 //		Calculate Band Select Clock
 		if (AutoBandSelectClock)
 		{
-				if (ADF4351_Reg3->b.BandSelMode == 0)   /// LOW
+				if (ADF4351_Reg3.b.BandSelMode == 0)   /// LOW
 				{
 					temp = (uint32_t)round(8 * PFDFreq);
 					if ((8 * PFDFreq - temp) > 0)
@@ -146,16 +157,18 @@ ADF4351_ERR_t UpdateFrequencyRegisters(double RFout, double REFin, double Output
 
 		/* Check parameters */
 		if (BandSelectClockFrequency > 500e3)  return ADF4351_Err_BandSelFreqTooHigh;  // 500kHz in fast mode
-		if ((BandSelectClockFrequency > 125e3) & (ADF4351_Reg3->b.BandSelMode == 0))  return ADF4351_Err_BandSelFreqTooHigh;   // 125kHz in slow mode
-		
+		if ((BandSelectClockFrequency > 125e3) & (ADF4351_Reg3.b.BandSelMode == 0))  return ADF4351_Err_BandSelFreqTooHigh;   // 125kHz in slow mode
 
 		// So far so good, let's fill the registers
 		
-		ADF4351_Reg0->b.FracVal = (FRAC & 0x0fff);
-		ADF4351_Reg0->b.IntVal = (INT & 0xffff);
-		ADF4351_Reg1->b.ModVal = (MOD & 0x0fff);
+		ADF4351_Reg0.b.FracVal = (FRAC & 0x0fff);
+		ADF4351_Reg0.b.IntVal = (INT & 0xffff);
+		ADF4351_Reg1.b.ModVal = (MOD & 0x0fff);
 		
-		return ADF4351_Err_None;
+		if (*RFoutCalc == RFout) 
+			return ADF4351_Err_None;
+		else
+			return ADF4351_Warn_NotTuned;			// PLL could not be tuned to exatly required frequency --- check the RFoutCalc foree exact value
 }
 
 
@@ -167,7 +180,48 @@ ADF4351_ERR_t UpdateFrequencyRegisters(double RFout, double REFin, double Output
   */
 uint32_t ADF4351_GetRegisterBuf(int addr)
 {
-	return (addr<6) ? ADF4351_Reg[addr] : 0;
+	switch (addr)
+	{
+		case 0 : return ADF4351_Reg0.w;
+		case 1 : return ADF4351_Reg1.w;
+		case 2 : return ADF4351_Reg2.w;
+		case 3 : return ADF4351_Reg3.w;
+		case 4 : return ADF4351_Reg4.w;
+		case 5 : return ADF4351_Reg5.w;
+	}
+	return 0x00000007;			// invalid address
+}
+
+/**
+  *  \brief Set local register buffer value
+  * 	
+  * @param  addr: 								Register address
+  */
+void ADF4351_SetRegisterBuf(int addr, uint32_t val)
+{
+	switch (addr)
+	{
+		case 0 : ADF4351_Reg0.w = val;
+		case 1 : ADF4351_Reg1.w = val;
+		case 2 : ADF4351_Reg2.w = val;
+		case 3 : ADF4351_Reg3.w = val;
+		case 4 : ADF4351_Reg4.w = val;
+		case 5 : ADF4351_Reg5.w = val;
+	}
+}
+
+
+/**
+  *  \brief Clear local register buffer values to 0
+  * 	
+  * @param  none
+  */
+void ADF4351_ClearRegisterBuf(void)
+{
+	int i;
+	
+	for (i=0; i<6; i++) ADF4351_SetRegisterBuf(i, 0x00000000);
+	
 }
 
 
@@ -182,7 +236,7 @@ ADF4351_ERR_t ADF4351_SetRcounterVal(uint16_t val)
 {
 	if ((val>0) & (val<1024)) 
 	{
-		ADF4351_Reg2->b.RCountVal = val;
+		ADF4351_Reg2.b.RCountVal = val;
 		return ADF4351_Err_None;
 	}
 	else 

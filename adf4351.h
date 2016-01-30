@@ -15,7 +15,11 @@
 
 
 #define ADF5451_PFD_MAX					32.0e6
+#define ADF4351_RFOUT_MAX				4400.0e6
+#define ADF4351_RFOUTMIN				34.375e6
+#define ADF4351_REFINMAX				250.0e6
 
+	
 /** \brief  Union type for the structure of Register0 in ADF4351
  */
 typedef union
@@ -391,18 +395,29 @@ typedef enum
 	ADF4351_Err_PFD,												/// PFD max error check
 	ADF4351_Err_BandSelFreqTooHigh,					/// Band select frequency too high
 	ADF4351_Err_InvalidRCounterValue,				/// Invalid R couinter value
+	ADF4351_Err_NoGCD_PhaseAdj,							/// No GCD when Phase adjust enabled
+	ADF4351_Err_RFoutTooHigh,								/// Output frequency too high
+	ADF4351_Err_RFoutTooLow,								/// Output frequency too low
+	ADF4351_Err_REFinTooHigh,								/// Reference input too high
+	ADF4351_Err_InvalidN,										/// N out of range
+	ADF4351_Err_InvalidMOD,									/// MOD out of range
+	ADF4351_Warn_NotTuned,									/// PLL output could not be tuned to exact frequency
+	ADF4351_Err_InvalidMODLowSpur,					/// Min. MOD in low spur mode is 50
 } 	ADF4351_ERR_t;	
 
-extern ADF4351_Reg0_t *ADF4351_Reg0;
-extern ADF4351_Reg1_t *ADF4351_Reg1;
-extern ADF4351_Reg2_t *ADF4351_Reg2;
-extern ADF4351_Reg3_t *ADF4351_Reg3;
-extern ADF4351_Reg4_t *ADF4351_Reg4;
-extern ADF4351_Reg5_t *ADF4351_Reg5;
+
+extern ADF4351_Reg0_t ADF4351_Reg0;
+extern ADF4351_Reg1_t ADF4351_Reg1;
+extern ADF4351_Reg2_t ADF4351_Reg2;
+extern ADF4351_Reg3_t ADF4351_Reg3;
+extern ADF4351_Reg4_t ADF4351_Reg4;
+extern ADF4351_Reg5_t ADF4351_Reg5;
 
 
 ADF4351_ERR_t UpdateFrequencyRegisters(double RFout, double REFin, double OutputChannelSpacing, int gcd, int AutoBandSelectClock, double *RFoutCalc );
 uint32_t ADF4351_GetRegisterBuf(int addr);
+void ADF4351_SetRegisterBuf(int addr, uint32_t val);
+void ADF4351_ClearRegisterBuf(void);
 
 
 #endif
