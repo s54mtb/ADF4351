@@ -66,7 +66,7 @@ typedef union
 		uint32_t PhasePolarity	:1; 		/*!< bit:  6 		 	Phase Detector Polarity */
 		uint32_t LockPrecision	:1; 		/*!< bit:  7 		 	Lock Detect Precision */
 		uint32_t LockFunction		:1; 		/*!< bit:  8 		 	Lock Detect Function */
-		uint32_t CPCurrent			:12; 		/*!< bit:  9..12 	Charge Pump Current Setting */
+		uint32_t CPCurrent			:4; 		/*!< bit:  9..12 	Charge Pump Current Setting */
 		uint32_t DoubleBuffer		:1; 		/*!< bit:  13		 	Double Buffer */
 		uint32_t RCountVal			:10; 		/*!< bit: 14..23 	10-Bit R Counter */
 		uint32_t RDiv2 					:1; 		/*!< bit: 24		 	Double Buffer */
@@ -418,6 +418,7 @@ ADF4351_ERR_t UpdateFrequencyRegisters(double RFout, double REFin, double Output
 uint32_t ADF4351_GetRegisterBuf(int addr);
 void ADF4351_SetRegisterBuf(int addr, uint32_t val);
 void ADF4351_ClearRegisterBuf(void);
+ADF4351_ERR_t ADF4351_Init(void);
 
 
 #endif

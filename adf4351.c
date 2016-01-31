@@ -84,8 +84,8 @@ ADF4351_ERR_t UpdateFrequencyRegisters(double RFout, double REFin, double Output
   double 			BandSelectClockFrequency;
 
 	/** Initial error and range check */
-	/* Error>>>> Disable GCD calculation when phase adjust active */
-	if (gcd & ADF4351_Reg1.b.PhaseAdjust) return ADF4351_Err_NoGCD_PhaseAdj;
+	/* Error >>>> Disable GCD calculation when phase adjust active */
+	//if (gcd && ADF4351_Reg1.b.PhaseAdjust) return ADF4351_Err_NoGCD_PhaseAdj;
   if (RFout > ADF4351_RFOUT_MAX) return	ADF4351_Err_RFoutTooHigh;
 	if (RFout < ADF4351_RFOUTMIN) return ADF4351_Err_RFoutTooLow;
 	if (REFin > ADF4351_REFINMAX) return	ADF4351_Err_REFinTooHigh;
@@ -125,7 +125,7 @@ ADF4351_ERR_t UpdateFrequencyRegisters(double RFout, double REFin, double Output
 	
 	// N is out of range!
 	if ((N < 23) | (N > 65635)) return ADF4351_Err_InvalidN;
-	if (MOD > 4095) return ADF4351_Err_InvalidMOD;
+	if (MOD > 0x0fff) return ADF4351_Err_InvalidMOD;
 
 	/* Check for PFD Max error, return error code if not OK */
 	if ((PFDFreq > ADF5451_PFD_MAX) && (ADF4351_Reg3.b.BandSelMode == 0)) return ADF4351_Err_PFD; 
@@ -164,6 +164,7 @@ ADF4351_ERR_t UpdateFrequencyRegisters(double RFout, double REFin, double Output
 		ADF4351_Reg0.b.FracVal = (FRAC & 0x0fff);
 		ADF4351_Reg0.b.IntVal = (INT & 0xffff);
 		ADF4351_Reg1.b.ModVal = (MOD & 0x0fff);
+		ADF4351_Reg4.b.BandClkDiv = BandSelectClockDivider; 
 		
 		if (*RFoutCalc == RFout) 
 			return ADF4351_Err_None;
@@ -241,6 +242,24 @@ ADF4351_ERR_t ADF4351_SetRcounterVal(uint16_t val)
 	}
 	else 
 		return ADF4351_Err_InvalidRCounterValue;
+}
+
+
+/**
+  *  \brief Init ADF4351 registers 
+  * 	
+  * @param  none
+  */
+ADF4351_ERR_t ADF4351_Init(void)
+{
+	ADF4351_Reg0.b.ControlBits = 0U;
+	ADF4351_Reg1.b.ControlBits = 1U;
+	ADF4351_Reg2.b.ControlBits = 2U;
+	ADF4351_Reg3.b.ControlBits = 3U;
+	ADF4351_Reg4.b.ControlBits = 4U;
+	ADF4351_Reg5.b.ControlBits = 5U;
+	ADF4351_Reg5.b._reserved_1 = 3U;
+	return ADF4351_Err_None;
 }
 
 
