@@ -165,7 +165,8 @@ ADF4351_ERR_t UpdateFrequencyRegisters(double RFout, double REFin, double Output
 		ADF4351_Reg0.b.IntVal = (INT & 0xffff);
 		ADF4351_Reg1.b.ModVal = (MOD & 0x0fff);
 		ADF4351_Reg4.b.BandClkDiv = BandSelectClockDivider; 
-		
+		ADF4351_Reg4.b.RfDivSel = ADF4351_Select_Output_Divider(RFout);
+	
 		if (*RFoutCalc == RFout) 
 			return ADF4351_Err_None;
 		else
